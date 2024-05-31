@@ -64,15 +64,44 @@ def depth_first_search(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    visited = set()  # To keep track of visited nodes
+    stack = util.Stack()  # last in first out
+    stack.push((problem.get_start_state(), []))  # Initialize the stack with the starting node and an empty path
+
+    while not stack.isEmpty():
+        node, path = stack.pop()
+        if problem.is_goal_state(node):
+            return path
+
+        if node not in visited:
+            visited.add(node)
+            for successor, action, step_cost in problem.get_successors(node):
+                if successor not in visited:
+                    stack.push((successor, path + [action]))
+
+    return []
 
 
 def breadth_first_search(problem):
     """
     Search the shallowest nodes in the search tree first.
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    visited = set()
+    queue = util.Queue()  # first in first out
+    queue.push((problem.get_start_state(), []))
+    while not queue.isEmpty():
+        node, path = queue.pop()
+
+        if problem.is_goal_state(node):
+            return path
+
+        if node not in visited:
+            visited.add(node)
+            for successor, action, step_cost in problem.get_successors(node):
+                if successor not in visited:
+                    queue.push((successor, path + [action]))
+
+    return []
 
 
 def uniform_cost_search(problem):
