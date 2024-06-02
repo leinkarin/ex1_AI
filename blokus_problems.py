@@ -57,6 +57,8 @@ class BlokusCornersProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0)):
         self.expanded = 0
         "*** YOUR CODE HERE ***"
+        self.board = Board(board_w, board_h, 1, piece_list, starting_point)
+        self.corners = [(0, 0), (0, board_h - 1), (board_w - 1, 0), (board_w - 1, board_h - 1)]
 
     def get_start_state(self):
         """
@@ -66,7 +68,11 @@ class BlokusCornersProblem(SearchProblem):
 
     def is_goal_state(self, state):
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        for corner in self.corners:
+            x, y = corner
+            if self.board.get_position(x, y) == -1:
+                return False
+        return True
 
     def get_successors(self, state):
         """
@@ -90,7 +96,11 @@ class BlokusCornersProblem(SearchProblem):
         be composed of legal moves
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        total_cost = 0
+        for action in actions:
+            # not checking if the move is legal
+            total_cost += action.piece.get_num_tiles()
+        return total_cost
 
 
 def blokus_corners_heuristic(state, problem):

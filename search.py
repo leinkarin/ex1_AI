@@ -109,7 +109,50 @@ def uniform_cost_search(problem):
     Search the node of least total cost first.
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    visited = set()
+    priority_queue = util.PriorityQueue()
+    start_state = problem.get_start_state()
+    state_cost_dict = {}  # To keep track of the least cost to reach each state from the start state
+    priority_queue.push((start_state, []), 0)  # Initialize the priority queue with the starting node
+    state_cost_dict[start_state] = 0  # Initialize the cost to reach the start state
+
+    while not priority_queue.isEmpty():
+        node, path = priority_queue.pop()  # Get the node with the least cost
+
+        if problem.is_goal_state(node):
+            return path
+
+        if node not in visited:
+            visited.add(node)
+            for successor, action, step_cost in problem.get_successors(node):
+                updated_cost = state_cost_dict[node] + step_cost
+                if successor not in state_cost_dict or updated_cost < state_cost_dict[successor]:
+                    state_cost_dict[successor] = updated_cost
+                    updated_path = path + [action]
+                    priority_queue.push((successor, updated_path), updated_cost)
+    return []
+
+
+def uniform_cost_search(problem):
+    visited = set()
+    priority_queue = util.PriorityQueue()
+    start_state = problem.get_start_state()
+    priority_queue.push((start_state, []), 0)  # Initialize the priority queue with the starting node
+
+    while not priority_queue.isEmpty():
+        node, path = priority_queue.pop()  # Get the node with the least cost
+
+        if problem.is_goal_state(node):
+            return path
+
+        if node not in visited:
+            visited.add(node)
+            for successor, action, step_cost in problem.get_successors(node):
+                new_path = path + [action]
+                new_cost = problem.get_cost_of_actions(new_path)
+                priority_queue.push((successor, new_path), new_cost)
+
+    return []
 
 
 def null_heuristic(state, problem=None):
@@ -125,7 +168,29 @@ def a_star_search(problem, heuristic=null_heuristic):
     Search the node that has the lowest combined cost and heuristic first.
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    visited = set()
+    priority_queue = util.PriorityQueueWithFunction(heuristic)
+    start_state = problem.get_start_state()
+    state_cost_dict = {}  # To keep track of the least cost to reach each state from the start state
+    priority_queue.push((start_state, []))  # Initialize the priority queue with the starting node
+    state_cost_dict[start_state] = 0  # Initialize the cost to reach the start state
+
+    while not priority_queue.isEmpty():
+        node, path = priority_queue.pop()  # Get the node with the least cost
+
+        if problem.is_goal_state(node):
+            return path
+
+        if node not in visited:
+            visited.add(node)
+            for successor, action, step_cost in problem.get_successors(node):
+                updated_cost = state_cost_dict[node] + step_cost
+                if successor not in state_cost_dict or updated_cost < state_cost_dict[successor]:
+                    state_cost_dict[successor] = updated_cost
+                    updated_path = path + [action]
+                    priority_queue.push((successor, updated_path))
+
+    return []
 
 
 # Abbreviations
