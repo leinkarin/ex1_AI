@@ -193,6 +193,9 @@ def main():
                       help='starting point', default=(0, 0))
 
     options, cover_points = parser.parse_args()
+    # print(options)
+    # print(cover_points)
+
     if (options.puzzle == 'cover' or options.puzzle == 'sub-optimal') and len(cover_points) == 0:
         raise Exception('cover puzzles require at least one point to cover!')
 

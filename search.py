@@ -3,7 +3,7 @@ In search.py, you will implement generic search algorithms
 """
 
 import util
-
+import math
 
 class SearchProblem:
     """
@@ -104,55 +104,95 @@ def breadth_first_search(problem):
     return []
 
 
+# def uniform_cost_search(problem):
+#     """
+#     Search the node of least total cost first.
+#     """
+#     "*** YOUR CODE HERE ***"
+#     visited = set()
+#     priority_queue = util.PriorityQueue()
+#     start_state = problem.get_start_state()
+#     state_cost_dict = {}  # To keep track of the least cost to reach each state from the start state
+#     priority_queue.push((start_state, []), 0)  # Initialize the priority queue with the starting node
+#     state_cost_dict[start_state] = 0  # Initialize the cost to reach the start state
+#
+#     while not priority_queue.isEmpty():
+#         node, path = priority_queue.pop()  # Get the node with the least cost
+#
+#         if problem.is_goal_state(node):
+#             return path
+#
+#         if node not in visited:
+#             visited.add(node)
+#             for successor, action, step_cost in problem.get_successors(node):
+#                 updated_cost = state_cost_dict[node] + step_cost
+#                 if successor not in state_cost_dict or updated_cost < state_cost_dict[successor]:
+#                     state_cost_dict[successor] = updated_cost
+#                     updated_path = path + [action]
+#                     priority_queue.push((successor, updated_path), updated_cost)
+#     return []
+#
+#
+# def uniform_cost_search(problem):
+#     visited = set()
+#     priority_queue = util.PriorityQueue()
+#     start_state = problem.get_start_state()
+#     priority_queue.push((start_state, []), 0)  # Initialize the priority queue with the starting node
+#
+#     while not priority_queue.isEmpty():
+#         node, path = priority_queue.pop()  # Get the node with the least cost
+#
+#         if problem.is_goal_state(node):
+#             return path
+#
+#         if node not in visited:
+#             visited.add(node)
+#             for successor, action, step_cost in problem.get_successors(node):
+#                 new_path = path + [action]
+#                 new_cost = problem.get_cost_of_actions(new_path)
+#                 priority_queue.push((successor, new_path), new_cost)
+#
+#     return []
+
+
 def uniform_cost_search(problem):
-    """
-    Search the node of least total cost first.
-    """
-    "*** YOUR CODE HERE ***"
+
+    priorityQueue = util.PriorityQueue()
+
+    priorityQueue.push(problem.get_start_state(), 0)
     visited = set()
-    priority_queue = util.PriorityQueue()
-    start_state = problem.get_start_state()
-    state_cost_dict = {}  # To keep track of the least cost to reach each state from the start state
-    priority_queue.push((start_state, []), 0)  # Initialize the priority queue with the starting node
-    state_cost_dict[start_state] = 0  # Initialize the cost to reach the start state
 
-    while not priority_queue.isEmpty():
-        node, path = priority_queue.pop()  # Get the node with the least cost
+    # Initialize the cost dictionary to keep track of the minimum cost to reach each node
+    cost = {problem.get_start_state(): 0}
 
-        if problem.is_goal_state(node):
-            return path
+    while not priorityQueue.isEmpty():
+        # Pop the node with the lowest cost
+        currentNode = priorityQueue.pop()
+        currentCost = cost[currentNode]
 
-        if node not in visited:
-            visited.add(node)
-            for successor, action, step_cost in problem.get_successors(node):
-                updated_cost = state_cost_dict[node] + step_cost
-                if successor not in state_cost_dict or updated_cost < state_cost_dict[successor]:
-                    state_cost_dict[successor] = updated_cost
-                    updated_path = path + [action]
-                    priority_queue.push((successor, updated_path), updated_cost)
-    return []
+        # If the goal node is reached, return the cost to reach the goal
+        if problem.is_goal_state(currentNode):
+            return currentNode, currentCost
+
+        # If the current node has not been visited
+        if currentNode not in visited:
+            visited.add(currentNode)
+
+            # Iterate over the neighbors of the current node
+            successors = problem.get_successors(currentNode)
+            for successor, action, actionCost in successors:
+                newCost = currentCost + actionCost
+
+            # If the neighbor has not been visited or a cheaper cost path is found
+                if successor not in cost or newCost < cost[successor]:
+                    cost[successor] = newCost
+                    priorityQueue.push(successor, newCost)
+
+    # If the goal node is not reachable, return infinity or an indicator of failure
+    return math.inf
 
 
-def uniform_cost_search(problem):
-    visited = set()
-    priority_queue = util.PriorityQueue()
-    start_state = problem.get_start_state()
-    priority_queue.push((start_state, []), 0)  # Initialize the priority queue with the starting node
 
-    while not priority_queue.isEmpty():
-        node, path = priority_queue.pop()  # Get the node with the least cost
-
-        if problem.is_goal_state(node):
-            return path
-
-        if node not in visited:
-            visited.add(node)
-            for successor, action, step_cost in problem.get_successors(node):
-                new_path = path + [action]
-                new_cost = problem.get_cost_of_actions(new_path)
-                priority_queue.push((successor, new_path), new_cost)
-
-    return []
 
 
 def null_heuristic(state, problem=None):
