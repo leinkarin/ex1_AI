@@ -154,16 +154,19 @@ def breadth_first_search(problem):
 #
 #     return []
 
+# actual
 
 def uniform_cost_search(problem):
 
     priorityQueue = util.PriorityQueue()
 
     priorityQueue.push(problem.get_start_state(), 0)
-    visited = set()
+    visited = dict()
+    parents = dict()
 
     # Initialize the cost dictionary to keep track of the minimum cost to reach each node
     cost = {problem.get_start_state(): 0}
+    parents[problem.get_start_state()] = None
 
     while not priorityQueue.isEmpty():
         # Pop the node with the lowest cost
@@ -172,11 +175,12 @@ def uniform_cost_search(problem):
 
         # If the goal node is reached, return the cost to reach the goal
         if problem.is_goal_state(currentNode):
-            return currentNode, currentCost
+            return reconstruct_path(parents, problem.get_start_state(), currentNode), currentCost
+
 
         # If the current node has not been visited
         if currentNode not in visited:
-            visited.add(currentNode)
+            visited[currentNode] = currentCost
 
             # Iterate over the neighbors of the current node
             successors = problem.get_successors(currentNode)
@@ -184,15 +188,47 @@ def uniform_cost_search(problem):
                 newCost = currentCost + actionCost
 
             # If the neighbor has not been visited or a cheaper cost path is found
-                if successor not in cost or newCost < cost[successor]:
+            #     if successor not in cost or newCost < cost[successor]:
+            #         cost[successor] = newCost
+            #         priorityQueue.push(successor, newCost)
+                if successor not in visited or newCost < cost[successor]:
                     cost[successor] = newCost
                     priorityQueue.push(successor, newCost)
+                    parents[successor] = (currentNode, action)
 
     # If the goal node is not reachable, return infinity or an indicator of failure
-    return math.inf
+    return []
 
-
-
+# Karin's friend
+# def uniform_cost_search(problem):
+#     """
+#     Search the node of least total cost first.
+#     """
+#     frontier = util.PriorityQueue()
+#     frontier.push(problem.get_start_state(), priority=0)
+#
+#     visited = dict()
+#     parents = dict()
+#
+#     parents[problem.get_start_state()] = None
+#     visited[problem.get_start_state()] = 0  # costs of the visited nodes
+#
+#     while not frontier.isEmpty():
+#         current = frontier.pop()
+#
+#         if problem.is_goal_state(current):
+#             return reconstruct_path(parents, problem.get_start_state(),
+#                                     current)
+#
+#         for successor, action, step_cost in problem.get_successors(current):
+#             new_priority = step_cost + visited[current]
+#
+#             if successor not in visited or new_priority < visited[successor]:
+#                 visited[successor] = new_priority
+#                 parents[successor] = (current, action)
+#                 frontier.push(successor, new_priority)
+#
+#     return []
 
 
 def null_heuristic(state, problem=None):
@@ -203,34 +239,83 @@ def null_heuristic(state, problem=None):
     return 0
 
 
+# def a_star_search(problem, heuristic=null_heuristic):
+#     """
+#     Search the node that has the lowest combined cost and heuristic first.
+#     """
+#     "*** YOUR CODE HERE ***"
+#     visited = set()
+#     priority_queue = util.PriorityQueueWithFunction(heuristic)
+#     start_state = problem.get_start_state()
+#     state_cost_dict = {}  # To keep track of the least cost to reach each state from the start state
+#     priority_queue.push((start_state, []))  # Initialize the priority queue with the starting node
+#     state_cost_dict[start_state] = 0  # Initialize the cost to reach the start state
+#
+#     while not priority_queue.isEmpty():
+#         node, path = priority_queue.pop()  # Get the node with the least cost
+#
+#         if problem.is_goal_state(node):
+#             return path
+#
+#         if node not in visited:
+#             visited.add(node)
+#             for successor, action, step_cost in problem.get_successors(node):
+#                 updated_cost = state_cost_dict[node] + step_cost
+#                 if successor not in state_cost_dict or updated_cost < state_cost_dict[successor]:
+#                     state_cost_dict[successor] = updated_cost
+#                     updated_path = path + [action]
+#                     priority_queue.push((successor, updated_path))
+#
+#     return []
+
 def a_star_search(problem, heuristic=null_heuristic):
     """
     Search the node that has the lowest combined cost and heuristic first.
     """
     "*** YOUR CODE HERE ***"
-    visited = set()
-    priority_queue = util.PriorityQueueWithFunction(heuristic)
+    frontier = util.PriorityQueue()
     start_state = problem.get_start_state()
-    state_cost_dict = {}  # To keep track of the least cost to reach each state from the start state
-    priority_queue.push((start_state, []))  # Initialize the priority queue with the starting node
-    state_cost_dict[start_state] = 0  # Initialize the cost to reach the start state
+    frontier.push(start_state, 0)
 
-    while not priority_queue.isEmpty():
-        node, path = priority_queue.pop()  # Get the node with the least cost
+    visited = dict()
+    parents = dict()
+    costs = dict()
 
-        if problem.is_goal_state(node):
-            return path
+    parents[start_state] = None
+    costs[start_state] = 0
 
-        if node not in visited:
-            visited.add(node)
-            for successor, action, step_cost in problem.get_successors(node):
-                updated_cost = state_cost_dict[node] + step_cost
-                if successor not in state_cost_dict or updated_cost < state_cost_dict[successor]:
-                    state_cost_dict[successor] = updated_cost
-                    updated_path = path + [action]
-                    priority_queue.push((successor, updated_path))
+    while not frontier.isEmpty():
+        current_state = frontier.pop()
+
+        if problem.is_goal_state(current_state):
+            return reconstruct_path(parents, start_state, current_state)
+
+        if current_state not in visited:
+            visited[current_state] = costs[current_state]
+
+            for successor, action, step_cost in problem.get_successors(
+                    current_state):
+                new_cost = costs[current_state] + step_cost
+                heuristic_cost = new_cost + heuristic(successor, problem)
+
+                if successor not in visited or new_cost < costs[successor]:
+                    costs[successor] = new_cost
+                    parents[successor] = (current_state, action)
+                    frontier.push(successor, heuristic_cost)
 
     return []
+
+
+def reconstruct_path(parents, start, goal):
+    path = []
+    current = goal
+    while current != start:
+        parent, action = parents[current]
+        path.append((parent, action))
+        current = parent
+    path.reverse()  # Reverse the path to start from the beginning
+    return path
+
 
 
 # Abbreviations
